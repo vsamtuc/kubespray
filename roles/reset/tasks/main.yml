@@ -38,7 +38,7 @@
   tags:
     - docker
 
-- name: reset | systemctl daemon-reload  # noqa 503
+- name: reset | systemctl daemon-reload  # noqa no-handler
   systemd:
     daemon_reload: true
   when: services_removed.changed
@@ -174,11 +174,10 @@
       tags:
         - services
 
-- name: reset | gather mounted kubelet dirs  # noqa 301
+- name: reset | gather mounted kubelet dirs
   shell: set -o pipefail && mount | grep /var/lib/kubelet/ | awk '{print $3}' | tac
   args:
     executable: /bin/bash
-    warn: false
   check_mode: no
   register: mounted_dirs
   failed_when: false
@@ -186,7 +185,7 @@
   tags:
     - mounts
 
-- name: reset | unmount kubelet dirs  # noqa 301
+- name: reset | unmount kubelet dirs
   command: umount -f {{ item }}
   with_items: "{{ mounted_dirs.stdout_lines }}"
   register: umount_dir
@@ -206,7 +205,7 @@
     - nat
     - mangle
     - raw
-  when: flush_iptables|bool
+  when: flush_iptables | bool
   tags:
     - iptables
 
@@ -220,7 +219,7 @@
     - nat
     - mangle
     - raw
-  when: flush_iptables|bool and enable_dual_stack_networks
+  when: flush_iptables | bool and enable_dual_stack_networks
   tags:
     - ip6tables
 
@@ -255,7 +254,7 @@
 - name: reset | Remove nodelocaldns
   command: "ip link del nodelocaldns"
   when:
-    - enable_nodelocaldns|default(false)|bool
+    - enable_nodelocaldns | default(false) | bool
     - nodelocaldns_device.stat.exists
 
 - name: reset | Check whether /var/lib/kubelet directory exists
@@ -279,7 +278,8 @@
     path: "{{ filedir_path }}"
     state: touch
     attributes: "-i"
-  loop: "{{ var_lib_kubelet_files_dirs_w_attrs.stdout_lines|select('search', 'Immutable')|list }}"
+    mode: 0644
+  loop: "{{ var_lib_kubelet_files_dirs_w_attrs.stdout_lines | select('search', 'Immutable') | list }}"
   loop_control:
     loop_var: file_dir_line
     label: "{{ filedir_path }}"
@@ -428,9 +428,10 @@
 
 - name: reset | Restart network
   service:
+    # noqa: jinja[spacing]
     name: >-
       {% if ansible_os_family == "RedHat" -%}
-      {%- if ansible_distribution_major_version|int >= 8 or is_fedora_coreos or ansible_distribution == "Fedora" -%}
+      {%- if ansible_distribution_major_version | int >= 8 or is_fedora_coreos or ansible_distribution == "Fedora" -%}
       NetworkManager
       {%- else -%}
       network

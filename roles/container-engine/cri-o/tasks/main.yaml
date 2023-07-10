@@ -32,7 +32,7 @@
 
 - name: cri-o | build a list of crio runtimes with Katacontainers runtimes
   set_fact:
-    crio_runtimes: "{{ crio_runtimes + kata_runtimes  }}"
+    crio_runtimes: "{{ crio_runtimes + kata_runtimes }}"
   when:
     - kata_containers_enabled
 
@@ -122,7 +122,7 @@
     mode: 0755
 
 - name: cri-o | set overlay driver
-  ini_file:
+  community.general.ini_file:
     dest: /etc/containers/storage.conf
     section: storage
     option: "{{ item.option }}"
@@ -136,7 +136,7 @@
 
 # metacopy=on is available since 4.19 and was backported to RHEL 4.18 kernel
 - name: cri-o | set metacopy mount options correctly
-  ini_file:
+  community.general.ini_file:
     dest: /etc/containers/storage.conf
     section: storage.options.overlay
     option: mountopt
@@ -196,7 +196,7 @@
   register: service_start
 
 - name: cri-o | trigger service restart only when needed
-  service:  # noqa 503
+  service:
     name: crio
     state: restarted
   when:

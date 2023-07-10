@@ -8,14 +8,14 @@
     src: webhook-token-auth-config.yaml.j2
     dest: "{{ kube_config_dir }}/webhook-token-auth-config.yaml"
     mode: 0640
-  when: kube_webhook_token_auth|default(false)
+  when: kube_webhook_token_auth | default(false)
 
 - name: Create webhook authorization config
   template:
     src: webhook-authorization-config.yaml.j2
     dest: "{{ kube_config_dir }}/webhook-authorization-config.yaml"
     mode: 0640
-  when: kube_webhook_authorization|default(false)
+  when: kube_webhook_authorization | default(false)
 
 - name: Create kube-scheduler config
   template:
@@ -100,5 +100,5 @@
     name: k8s-certs-renew.timer
     enabled: yes
     state: started
-    daemon-reload: "{{ k8s_certs_units is changed }}"
+    daemon_reload: "{{ k8s_certs_units is changed }}"
   when: auto_renew_certificates
